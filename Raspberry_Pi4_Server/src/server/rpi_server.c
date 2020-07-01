@@ -31,7 +31,7 @@ void start_server(void) {
     server.server_addr.sin_family = AF_INET;
 #ifdef _PI
     printf("Pi4 build detected...\n");
-    server.server_addr.sin_addr.s_addr = inet_addr("192.168.1.24");
+    server.server_addr.sin_addr.s_addr = inet_addr("192.168.1.25");
 #else
     printf("x86_64 build detected...\n");
     server.server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
