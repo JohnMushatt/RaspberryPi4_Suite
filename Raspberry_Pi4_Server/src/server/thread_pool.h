@@ -12,28 +12,12 @@
 
 typedef void (*thread_func_t)(void *arg);
 
-/**
- * func - function to run on thread worker
- * arg - argument for passed function
- */
-typedef struct st_thread_unit {
-    thread_func_t func;
-    void *arg;
-    struct st_thread_unit *next;
-} thread_unit_t;
+
+
 /***
  *
  */
-typedef struct st_thread_pool {
-    thread_unit_t *work_head;
-    thread_unit_t *work_tail;
-    pthread_mutex_t working_mutex;
-    pthread_cond_t work_conditional;
-    pthread_cond_t working_conditional;
-    size_t working_cnt;
-    size_t thread_cnt;
-    bool running;
-} thread_pool_t;
+typedef struct st_thread_pool thread_pool_t ;
 
 /***
  * Gets the number of cores available on the target system

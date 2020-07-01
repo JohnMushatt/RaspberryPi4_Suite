@@ -4,6 +4,44 @@
 #include "thread_pool.h"
 #include <stdlib.h>
 #include <stdio.h>
+
+
+/**
+ * @brief Struct containing a function pointer, argument pointer, and the next node in the thread pool work list
+ * @struct st_thread_unit Represents a node in a linked list of workable objects within a thread pool
+ * @field thread_func_t func - Function pointer to run on when a thread grabs this unit
+ * @field void  *arg - Argument pointer to data for thread to execute with function
+ */
+typedef struct st_thread_unit {
+    thread_func_t func;
+    void *arg;
+    struct st_thread_unit *next;
+} thread_unit_t;
+/**
+ * @brief Struct containing head and tail pointers to thread_unit_t objects, mutex, 2 conditionals, working and thread counts,
+ * and running status
+ * @struct st_thread_pool Representsa collection of workable objects in a linked-list FIFO queue that allows a pool of threasds
+ * to retrieve jobs/units of work to be completed
+ * @param thread_unit_t *work_head Head of job list
+ * @param thread_unit_t *work_tail Tail of job list
+ * @param pthread_mutex_t working_mutex Mutex for threads to retrieve units
+ * @param pthread_cond_t work_conditional Conditional variable for signaling if there is still work remaining in the list
+ * @param pthread_con_t working_conditional Conditional variable for signaling whether there are still threads actively working
+ * @param size_t working_cnt Number of actively working threads
+ * @param size_t thread_cnt Number of active threads remaining in the pool
+ * @param bool running Boolean representing whether the thread pool is actively running
+ */
+typedef struct st_thread_pool {
+    thread_unit_t *work_head;
+    thread_unit_t *work_tail;
+    pthread_mutex_t working_mutex;
+    pthread_cond_t work_conditional;
+    pthread_cond_t working_conditional;
+    size_t working_cnt;
+    size_t thread_cnt;
+    bool running;
+} thread_pool_t;
+
 uint64_t get_pc_thread_count(void) {
 #ifdef _WIN32
     SYSTEM_INFO sysinfo;
@@ -18,7 +56,7 @@ uint64_t get_pc_thread_count(void) {
 }
 
 /***
- * Create a unit of work to be added to the queue
+ * @brief Create a unit of work to be added to the queue
  * @param func Function for work to be done
  * @param arguments Arguments for function
  * @return Unit of work
@@ -127,7 +165,7 @@ thread_pool_t *thread_pool_create(size_t num_threads) {
 
     pthread_t id;
     for (size_t i = 0; i < thread_pool->thread_cnt; i++) {
-        pthread_create(&id, NULL, &thread_unit_work, (void *) thread_pool);
+        pthread_create(&id, NULL, thread_unit_work, (void *) thread_pool);
         pthread_detach(id);
     }
     return thread_pool;

@@ -6,7 +6,6 @@
 #include "thread_pool.h"
 
 
-
 typedef struct st_connection {
     struct sockaddr_in addr;
     int64_t connection_file_descriptor;
@@ -20,7 +19,8 @@ typedef struct st_server {
     Queue server_queue;
     int64_t fd;
 } Server;
-Server  server;
+Server server;
+void client_job(void *argument);
 void start_server(void) {
     server.thread_pool = thread_pool_create(0);
     // Creating socket file descriptor
@@ -70,27 +70,16 @@ void start_server(void) {
             perror("In accept");
         }
         Connection *client = (Connection *) malloc(sizeof(Connection));
-        client->addr=client_addr;
+        client->addr = client_addr;
         client->connection_file_descriptor = incoming_socket;
-        printf("Client with ip %s connected...\n",inet_ntoa(client->addr.sin_addr));
-        //close(client->connection_file_descriptor);
+        printf("Client with ip %s connected...\n", inet_ntoa(client->addr.sin_addr));
+        thread_pool_add_unit(server.thread_pool,&client_job,(void *)client);
         sleep(1);
     }
 }
-void schedule_clients(void) {}
-
-int8_t queue_client(Connection *client) {
-    int8_t ret = queue(&server.server_queue, (void *) client);
-    return ret;
+void client_job(void *argument) {
+    Connection *client = (Connection *) argument;
+    printf("Thread %zu is handling client from %s\n",pthread_self(),inet_ntoa(client->addr.sin_addr));
 }
 
-Connection *dequeue_client(void) {
-    Connection *client = (Connection *) dequeue(&server.server_queue);
-    return client;
-}
-/*
-char *ip_to_string(struct in_addr addr, char *buffer) {
-    //inet_ntop(AF_INET,addr,buffer,INET_ADDRSTRLEN);
-    return "";
-}
-*/
+
