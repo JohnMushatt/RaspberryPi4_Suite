@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "rpi_server.h"
-int main(int argc, char** argv) {
+int main() {
 
     start_server();
 

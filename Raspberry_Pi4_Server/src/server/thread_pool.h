@@ -4,10 +4,14 @@
 
 #ifndef EK_TM4C1294XL_TEMPERATURE_CLIENT_THREAD_POOL_H
 #define EK_TM4C1294XL_TEMPERATURE_CLIENT_THREAD_POOL_H
+
 #include <stdbool.h>
 #include <stddef.h>
+#include <pthread.h>
+#include <stdint.h>
 
 typedef void (*thread_func_t)(void *arg);
+
 /**
  * func - function to run on thread worker
  * arg - argument for passed function
@@ -28,25 +32,35 @@ typedef struct st_thread_pool {
     pthread_cond_t working_conditional;
     size_t working_cnt;
     size_t thread_cnt;
-    bool  running;
+    bool running;
 } thread_pool_t;
+
 /***
- * Create a unit of work to be added to the queue
- * @param func Function for work to be done
- * @param arguments Arguments for function
- * @return Unit of work
+ * Gets the number of cores available on the target system
+ * @return 64-bit integer representing the number of available cores/processors on the target system
  */
-static thread_unit_t *thread_unit_create(thread_func_t func, void *arguments);
+uint64_t get_pc_thread_count(void);
+
+
 /***
- * Free memory associated with a work unit
- * @param unit Unit object to free resources from
+ * Creates a thread_pool_t object
+ * @param num_threads Sets thread pool size to num_threads, if 0 it uses the system number of cores
+ * @return thread_pool_t object
  */
-static void thread_unit_destroy(thread_unit_t *unit);
+thread_pool_t *thread_pool_create(size_t num_threads);
+
 /***
- * Gets the next available piece of work from the queue and updates the queue
- * @param pool Work pool to get work from
- * @return thread_unit_t object containing work
+ * Waits for the remaining threads to finish their work before returning
+ * @param thread_pool thread_pool_t object to wait on
  */
-static thread_unit_t *thread_pool_get_unit(thread_pool_t *pool);
-static void
+void thread_pool_wait(thread_pool_t *thread_pool);
+
+/***
+ * Frees memory allocated to designated thread_pool_t object
+ * @param thread_pool thread_pool_t object to release allocated memory from
+ */
+void thread_pool_destroy(thread_pool_t *thread_pool);
+
+bool thread_pool_add_unit(thread_pool_t *thread_pool, thread_func_t func, void *arg);
+
 #endif //EK_TM4C1294XL_TEMPERATURE_CLIENT_THREAD_POOL_H

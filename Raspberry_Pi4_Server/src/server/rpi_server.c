@@ -3,9 +3,26 @@
 //
 
 #include "rpi_server.h"
+#include "thread_pool.h"
 
+
+
+typedef struct st_connection {
+    struct sockaddr_in addr;
+    int64_t connection_file_descriptor;
+    int64_t id;
+} Connection;
+
+typedef struct st_server {
+    thread_pool_t *thread_pool;
+    uint8_t message_buffer[1024];
+    struct sockaddr_in server_addr;
+    Queue server_queue;
+    int64_t fd;
+} Server;
+Server  server;
 void start_server(void) {
-    init_queue(&server.server_queue);
+    server.thread_pool = thread_pool_create(0);
     // Creating socket file descriptor
     if ((server.fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("In socket");
@@ -56,7 +73,6 @@ void start_server(void) {
         client->addr=client_addr;
         client->connection_file_descriptor = incoming_socket;
         printf("Client with ip %s connected...\n",inet_ntoa(client->addr.sin_addr));
-        queue_client(client);
         //close(client->connection_file_descriptor);
         sleep(1);
     }
