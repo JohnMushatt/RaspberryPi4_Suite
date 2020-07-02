@@ -74,12 +74,13 @@ void start_server(void) {
         client->connection_file_descriptor = incoming_socket;
         printf("Client with ip %s connected...\n", inet_ntoa(client->addr.sin_addr));
         thread_pool_add_unit(server.thread_pool,&client_job,(void *)client);
+        thread_pool_wait(server.thread_pool);
         sleep(1);
     }
 }
 void client_job(void *argument) {
     Connection *client = (Connection *) argument;
-    printf("Thread %zu is handling client from %s\n",pthread_self(),inet_ntoa(client->addr.sin_addr));
+    printf("Thread %lu is handling client from %s\n",pthread_self(),inet_ntoa(client->addr.sin_addr));
 }
 
 

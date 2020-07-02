@@ -162,7 +162,7 @@ thread_pool_t *thread_pool_create(size_t num_threads) {
 
     thread_pool->work_head = NULL;
     thread_pool->work_tail = NULL;
-
+    thread_pool->running=true;
     pthread_t id;
     for (size_t i = 0; i < thread_pool->thread_cnt; i++) {
         pthread_create(&id, NULL, thread_unit_work, (void *) thread_pool);
