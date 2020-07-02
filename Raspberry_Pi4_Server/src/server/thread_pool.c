@@ -149,7 +149,7 @@ static void *thread_unit_work(void *arg) {
 }
 
 thread_pool_t *thread_pool_create(size_t num_threads) {
-    thread_pool_t *thread_pool = (thread_pool_t *) malloc(sizeof(thread_pool_t *));
+    thread_pool_t *thread_pool = (thread_pool_t *) malloc(sizeof(thread_pool_t ));
     if (num_threads != 0) {
         thread_pool->thread_cnt = num_threads;
     }
