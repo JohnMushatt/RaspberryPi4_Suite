@@ -5,6 +5,8 @@
 #include "rpi_server.h"
 #include "thread_pool.h"
 
+#define BUFFER_LENGTH 1024
+
 
 typedef struct st_connection {
     struct sockaddr_in addr;
@@ -79,8 +81,19 @@ void start_server(void) {
     }
 }
 void client_job(void *argument) {
+    char buffer[BUFFER_LENGTH];
     Connection *client = (Connection *) argument;
     printf("Thread %lu is handling client from %s\n",pthread_self(),inet_ntoa(client->addr.sin_addr));
+    int64_t status;
+    while(1) {
+        status = read(client->connection_file_descriptor,buffer,BUFFER_LENGTH);
+        if(status <0) {
+            perror("in read: negative return");
+            break;
+        }
+        printf("Device message: %1024s\n",buffer);
+        memset(buffer,0,BUFFER_LENGTH);
+    }
 }
 
 
