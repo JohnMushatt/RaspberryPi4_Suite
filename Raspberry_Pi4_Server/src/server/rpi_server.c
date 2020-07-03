@@ -81,7 +81,7 @@ void start_server(void) {
     }
 }
 void client_job(void *argument) {
-    char buffer[BUFFER_LENGTH];
+    char buffer[BUFFER_LENGTH] = {0};
     Connection *client = (Connection *) argument;
     printf("Thread %lu is handling client from %s\n",pthread_self(),inet_ntoa(client->addr.sin_addr));
     int64_t status;
@@ -91,7 +91,7 @@ void client_job(void *argument) {
             perror("in read: negative return");
             break;
         }
-        printf("Device message: %1024s\n",buffer);
+        fprintf(stdout,"Device message: %s\n",buffer);
         memset(buffer,0,BUFFER_LENGTH);
     }
 }
